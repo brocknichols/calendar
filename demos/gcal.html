@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href='../fullcalendar/fullcalendar.css' rel='stylesheet' />
+<link href='../fullcalendar/fullcalendar.print.css' rel='stylesheet' media='print' />
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src='../lib/jquery.min.js'></script>
+<script src='../lib/jquery-ui.custom.min.js'></script>
+<script src='../fullcalendar/fullcalendar.js'></script>
+<script src='../fullcalendar/gcal.js'></script>
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+
+<style type="text/css">
+    .isEvent{
+        background-color:#000;
+        color: #fff;
+        cursor: pointer;
+    }
+    .fc-today{
+        color: yellow;
+    }
+    .fc-day-content{
+        display:none;
+    }
+    .fc-event-container{
+        display:none;
+    }
+    .ui-dialog td{
+        text-align: left;
+    }
+    .ui-dialog table{
+        margin:10px 0;
+    }
+    .ui-dialog a{
+        color: crimson;
+    }
+    .ui-dialog{
+        -webkit-box-shadow: 0px 3px 9px 0px rgba(50, 50, 50, 0.75);
+        -moz-box-shadow:    0px 3px 9px 0px rgba(50, 50, 50, 0.75);
+        box-shadow:         0px 3px 9px 0px rgba(50, 50, 50, 0.75);
+    }
+</style>
+<script>
+function goto_event(url){
+    window.open(url, 'gcalevent', 'width=800,height=600');
+}
+    $(document).click(function(event) {
+        if (!$(event.target).closest(".fc-content").length) {
+                            var $activeDialogs = $(".ui-dialog:visible").find('.ui-dialog-content');
+                            $activeDialogs.dialog('close');
+        }
+    });
+	$(document).ready(function() {
+
+		$('#calendar').fullCalendar({
+                        header:false,
+                        eventColor: "#000",
+                        eventBackgroundColor: "#000",
+                        eventTextColor: "#000",
+			// US Holidays
+                        events: 'https://www.google.com/calendar/feeds/magreserve%40gmail.com/public/basic',
+                       eventRender: function (event, element, monthView) { 
+                         var dateString=$.fullCalendar.formatDate( event.start, 'yyyy-MM-dd' );
+                         var dis_start=$.fullCalendar.formatDate( event.start, 'M/d/yy h:mm TT' );
+                         var dis_end=$.fullCalendar.formatDate( event.end, 'M/d/yy h:mm TT' );
+                         $('*[data-date="'+dateString+'"]').addClass("isEvent");
+                         if($("#d"+dateString).length>0){
+                             $("#d"+dateString).append("<table><tr><td>Event</td><td><a href='#' onClick=\"goto_event('"+
+                                     event.url+"')\">"+event.title+"</a>"+
+                                     "</td></tr><tr><td>Start</td><td>"+dis_start+
+                                     "</td></tr><tr><td>End</td><td>"+dis_end+
+                                     "</td></tr><tr><td>Location:</td><td>"+event.location+
+                                     "</td></tr><tr><td>Description:</td><td>"+event.description+
+                                     "</td></tr></table>");
+                         } else {
+                            $(".eventdata").append("<div id='d"+dateString+"'><table><tr><td>Event</td><td><a href='#' onClick=\"goto_event('"+
+                                    event.url+"')\">"+event.title+"</a>"+
+                                     "</td></tr><tr><td>Start</td><td>"+dis_start+
+                                     "</td></tr><tr><td>End</td><td>"+dis_end+
+                                     "</td></tr><tr><td>Location:</td><td>"+event.location+
+                                     "</td></tr><tr><td>Description:</td><td>"+event.description+
+                                     "</td></tr></table></div>");
+                            }
+                        },
+			eventClick: function(event) {
+				// opens events in a popup window
+//				
+                                $('#d'+dateString).dialog();
+				return false;
+			},
+                        dayClick: function( date, allDay, jsEvent, view ){
+                            var gd=date.toDateString();
+                            var dp=new Date(gd);
+                            var dateString=$.fullCalendar.formatDate( date, 'yyyy-MM-dd' );;
+                            if($('*[data-date="'+dateString+'"]').hasClass("isEvent")){
+                            var $activeDialogs = $(".ui-dialog:visible").find('.ui-dialog-content');
+                            $activeDialogs.dialog('close');
+                            $( "#d"+dateString+" table:odd" ).css( "background-color", "#EBEBEB" ); 
+                            $('#d'+dateString).attr('title', dateString);
+                            $('#d'+dateString).dialog({
+                                maxHeight: 250,
+                                show: {effect: 'fade', duration: '150'},
+                                hide: {effect: 'fade', duration: '10'},
+                                position: {
+                                   my: 'right top',
+                                   at: 'left top',
+                                   of: this
+                                }});
+                        }
+                        },
+			loading: function(bool) {
+				if (bool) {
+					$('#loading').show();
+				}else{
+					$('#loading').hide();
+				}
+			}
+			
+		});
+                
+               
+	});
+
+</script>
+<style>
+
+	body {
+		margin-top: 40px;
+		text-align: center;
+		font-size: 14px;
+		font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+		}
+		
+	#loading {
+		position: absolute;
+		top: 5px;
+		right: 5px;
+		}
+
+	#calendar {
+		width: 200px;
+		margin: 0 auto;
+		}
+
+</style>
+</head>
+<body>
+<div id='loading' style='display:none'>loading...</div>
+<div id='calendar'></div>
+<div class="eventdata" title="Event Schedule" style="display:none;"></div>
+</body>
+</html>
